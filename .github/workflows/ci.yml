@@ -1,0 +1,30 @@
+name: Kernel Build CI
+
+on:
+  push:
+    branches: [ lineage-23.0 ]
+  pull_request:
+    branches: [ lineage-23.0 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Set up environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential bc flex bison libssl-dev libelf-dev wget curl git zip unzip
+
+    - name: Run build script
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT }}
+      run: |
+        chmod +x build.sh
+        ./build.sh
