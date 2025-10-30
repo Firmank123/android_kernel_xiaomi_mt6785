@@ -313,4 +313,3 @@ BUILD_END=$(date +"%s")
 DIFF=$((BUILD_END - BUILD_START))
 make_zip
 send_zip
-rm -rf AnyKernel3

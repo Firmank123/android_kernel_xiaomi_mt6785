@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -29,3 +29,19 @@ jobs:
       run: |
         chmod +x build.sh
         ./build.sh
+
+    - name: Upload kernel ZIP artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-zip
+        path: AnyKernel3/*.zip
+        retention-days: 3
+
+    - name: Upload build log on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-error-log
+        path: error.log
+        retention-days: 3
