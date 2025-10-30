@@ -33,10 +33,13 @@ err()
 export TELEGRAM_TOKEN=""
 export TELEGRAM_CHAT=""
 
-if [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT" ]
-then
-    err "Missing environment! .Please check again . ."
-    exit
+# Skip telegram check if in CI environment
+if [ "$CI" != "true" ]; then
+    if [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT" ]
+    then
+        err "Missing environment! .Please check again . ."
+        exit
+    fi
 fi
 
 #####################
@@ -130,8 +133,10 @@ clone()
      msg "Clone AnyKernel3 source"
      git clone --depth=1 https://github.com/ChuckProjekt/AnyKernel3
 
-     msg "Clone telegram.sh source"
-     git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
+     if [ "$CI" != "true" ]; then
+         msg "Clone telegram.sh source"
+         git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
+     fi
 }
 
 # Export
@@ -167,7 +172,9 @@ exports()
        CORES=$(nproc --all)
 
        # Telegram directory.
-       TELEGRAM=$MAIN_DIR/telegram/telegram
+       if [ "$CI" != "true" ]; then
+           TELEGRAM=$MAIN_DIR/telegram/telegram
+       fi
 
        export TZ ARCH DEVICE_DEFCONFIG KBUILD_BUILD_USER KBUILD_BUILD_HOST \
               PATH KBUILD_COMPILER_STRING COMPILER CORES \
@@ -177,19 +184,23 @@ exports()
 # Function to show an informational message to telegram.
 send_msg()
 {
-    "${TELEGRAM}" -H -D \
-        "$(
-            for POST in "${@}"; do
-                echo "${POST}"
-            done
-        )"
+    if [ "$CI" != "true" ]; then
+        "${TELEGRAM}" -H -D \
+            "$(
+                for POST in "${@}"; do
+                    echo "${POST}"
+                done
+            )"
+    fi
 }
 
 send_file()
 {
-    "${TELEGRAM}" -H \
-        -f "$1" \
-        "$2"
+    if [ "$CI" != "true" ]; then
+        "${TELEGRAM}" -H \
+            -f "$1" \
+            "$2"
+    fi
 }
 
 # Function for KernelSU.
@@ -213,19 +224,23 @@ make_zip()
 # Upload ZIP files to Telegram.
 send_zip()
 {
-    msg "Start to upload ZIP files.."
-    cd AnyKernel3
-    ZIPFILE=$(echo *.zip)
-    SHA1=$(sha1sum "$ZIPFILE" | cut -d' ' -f1)
-    send_file "$ZIPFILE" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s) for $DEVICE_CODENAME | SHA1 : <code>$SHA1</code>"
+    if [ "$CI" != "true" ]; then
+        msg "Start to upload ZIP files.."
+        cd AnyKernel3
+        ZIPFILE=$(echo *.zip)
+        SHA1=$(sha1sum "$ZIPFILE" | cut -d' ' -f1)
+        send_file "$ZIPFILE" "✅ Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s) for $DEVICE_CODENAME | SHA1 : <code>$SHA1</code>"
+    fi
 }
 
 # Function for upload error log during compiled.
 send_log()
 {
-    ERROR_LOG=$(echo error.log)
-    send_file "$ERROR_LOG" "❌ Build failed to compile, Please check log to fix it!"
-    exit 1
+    if [ "$CI" != "true" ]; then
+        ERROR_LOG=$(echo error.log)
+        send_file "$ERROR_LOG" "❌ Build failed to compile, Please check log to fix it!"
+        exit 1
+    fi
 }
 
 # Compilation setup.

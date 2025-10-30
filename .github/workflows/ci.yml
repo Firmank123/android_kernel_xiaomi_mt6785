@@ -23,6 +23,7 @@ jobs:
 
     - name: Run build script
       env:
+        CI: true
         TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT }}
       run: |
