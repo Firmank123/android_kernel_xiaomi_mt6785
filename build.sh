@@ -68,7 +68,7 @@ DEVICE_DEFCONFIG=rosemary_defconfig
 IMAGE=Image.gz-dtb
 
 # Specify kernel name for ZIP name
-KERNEL_NAME="Mahkotanya ambil sendiri di DC Cakung"
+KERNEL_NAME="Kata mas fajar franco sudah ulti"
 
 # Check kernel version.
 SUBLEVEL=$(make kernelversion)
